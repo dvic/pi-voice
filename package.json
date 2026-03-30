@@ -1,7 +1,7 @@
 {
   "name": "@artale/pi-voice",
-  "version": "2.0.0",
-  "description": "Voice input for Pi. Multi-provider STT with Deepgram streaming, Groq Whisper, OpenAI Whisper. 56+ languages.",
+  "version": "2.0.1",
+  "description": "Voice input for Pi. Multi-provider STT with Deepgram, Groq Whisper, OpenAI Whisper.",
   "keywords": [
     "pi-package",
     "pi-extension",
@@ -18,12 +18,18 @@
   "author": "artale",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arosstale/pi-voice.git"
+    "url": "https://github.com/dvic/pi-voice.git"
+  },
+  "scripts": {
+    "test": "node test/load-extension.mjs"
   },
   "extensions": [
     "extensions/pi-voice.ts"
   ],
   "pi": {
+    "extensions": [
+      "./extensions/pi-voice.ts"
+    ],
     "commands": [
       "voice"
     ],
