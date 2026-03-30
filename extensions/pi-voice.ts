@@ -69,12 +69,17 @@ function saveConfig(config: VoiceConfig) {
   writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
-function hasTool(cmd: string): boolean {
-  try { execSync(`${cmd} --version`, { stdio: 'pipe', timeout: 5000 }); return true; } catch { return false; }
+function hasTool(command: string[]): boolean {
+  try {
+    execSync(command.map((part) => JSON.stringify(part)).join(' '), { stdio: 'pipe', timeout: 5000 });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-function hasSox(): boolean { return hasTool('sox'); }
-function hasFfmpeg(): boolean { return hasTool('ffmpeg'); }
+function hasSox(): boolean { return hasTool(['sox', '--version']); }
+function hasFfmpeg(): boolean { return hasTool(['ffmpeg', '-version']); }
 function hasDeepgramKey(): boolean { return !!process.env.DEEPGRAM_API_KEY; }
 function hasGroqKey(): boolean { return !!process.env.GROQ_API_KEY; }
 function hasOpenAIKey(): boolean { return !!process.env.OPENAI_API_KEY; }
