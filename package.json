@@ -27,6 +27,9 @@
     "extensions/pi-voice.ts"
   ],
   "pi": {
+    "extensions": [
+      "./extensions/pi-voice.ts"
+    ],
     "commands": [
       "voice"
     ],
