@@ -21,6 +21,8 @@ assert.equal(result.extensions.length, 1, 'expected one extension to load');
 
 const extension = result.extensions[0];
 assert.ok(extension.commands.has('voice'), 'voice command should be registered');
+assert.equal(typeof extension.commands.get('voice').handler, 'function', 'voice command should expose handler');
 assert.ok(extension.tools.has('voice_capture'), 'voice_capture tool should be registered');
+assert.equal(typeof extension.tools.get('voice_capture').definition.execute, 'function', 'voice tool should expose execute');
 
 console.log('ok');

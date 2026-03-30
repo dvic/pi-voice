@@ -333,7 +333,7 @@ function runDiagnostics(): string {
 export default function piVoice(pi: ExtensionAPI) {
   pi.registerCommand('voice', {
     description: 'Voice input — record, transcribe, dictate. Multi-provider STT.',
-    execute: async (_ctx, args) => {
+    handler: async (args, _ctx) => {
       const parts = args.trim().split(/\s+/);
       const sub = parts[0]?.toLowerCase() || 'record';
       const config = loadConfig();
@@ -468,29 +468,43 @@ export default function piVoice(pi: ExtensionAPI) {
 
   pi.registerTool({
     name: 'voice_capture',
+    label: 'Voice capture',
     description: 'Record audio and transcribe to text. Multi-provider: Deepgram, Groq Whisper, OpenAI Whisper.',
     parameters: Type.Object({
       seconds: Type.Optional(Type.Number({ description: 'Recording duration in seconds (default: 10)' })),
       language: Type.Optional(Type.String({ description: 'Language code (default: en).' })),
     }),
-    execute: async (params: { seconds?: number; language?: string }) => {
+    execute: async (_toolCallId, params, _signal, _onUpdate, _ctx) => {
       const config = loadConfig();
       if (params.language) config.language = params.language;
       const seconds = params.seconds || 10;
 
       const audioFile = recordAudio(seconds);
-      if (!audioFile) return 'Audio recording failed. Install SoX, ffmpeg, or arecord.';
+      if (!audioFile) {
+        return {
+          content: [{ type: 'text', text: 'Audio recording failed. Install SoX, ffmpeg, or arecord.' }],
+          details: { error: 'audio-recording-failed' },
+        };
+      }
 
       const result = await transcribe(audioFile, config);
       try { unlinkSync(audioFile); } catch {}
 
-      if (!result) return 'Transcription failed. Set DEEPGRAM_API_KEY, GROQ_API_KEY, or OPENAI_API_KEY.';
+      if (!result) {
+        return {
+          content: [{ type: 'text', text: 'Transcription failed. Set DEEPGRAM_API_KEY, GROQ_API_KEY, or OPENAI_API_KEY.' }],
+          details: { error: 'transcription-failed' },
+        };
+      }
 
       const history = loadHistory();
       history.push({ timestamp: new Date().toISOString(), text: result.text, provider: result.provider, duration: seconds, language: config.language });
       saveHistory(history);
 
-      return result.text;
+      return {
+        content: [{ type: 'text', text: result.text }],
+        details: { provider: result.provider, duration: seconds, language: config.language },
+      };
     },
   });
 }
